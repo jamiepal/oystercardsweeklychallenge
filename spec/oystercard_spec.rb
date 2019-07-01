@@ -17,4 +17,17 @@ describe Oystercard do
     subject.top_up(50)
     expect(subject.deduct(3)).to eq 47
   end
+
+  it { should_not be_in_journey } #used predicate method matcher
+
+  it "touching in changes in_journey to true" do
+    subject.touch_in
+    expect(subject.in_journey?).to eq true
+  end
+
+  it "touching out changes in_journey to false" do
+    subject.touch_in
+    subject.touch_out
+    expect(subject.in_journey?).to eq false
+  end
 end
