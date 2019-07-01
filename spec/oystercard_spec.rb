@@ -13,10 +13,10 @@ describe Oystercard do
     expect {subject.top_up(91)}.to raise_error("Error: Maximum balance is £#{Oystercard::MAXIMUM_BALANCE}")
   end
 
-  it "the fare amount gets deducted from the total balance" do
-    subject.top_up(50)
-    expect(subject.deduct(3)).to eq 47
-  end
+#  it "the fare amount gets deducted from the total balance" do
+#    subject.top_up(50)
+#    expect(subject.deduct(3)).to eq 47
+#  end
 
   it { should_not be_in_journey } #used predicate method matcher
 
@@ -25,6 +25,7 @@ describe Oystercard do
     subject.touch_in
     expect(subject.in_journey?).to eq true
   end
+  
 
   it "touching out changes in_journey to false" do
     subject.top_up(2)
@@ -38,5 +39,10 @@ describe Oystercard do
   it "checks for minimum balance on touch in and does not raise error if balance is >= minimum fare: #{Oystercard::MINIMUM_FARE}" do
     subject.top_up(Oystercard::MINIMUM_FARE)
     expect(subject.touch_in).to eq true
+  end
+  it "deducts minimumfare from balance upon touch-out" do
+    subject.top_up(2)
+    subject.touch_in
+    expect {subject.touch_out}.to change{subject.balance}.by(-1)
   end
 end
