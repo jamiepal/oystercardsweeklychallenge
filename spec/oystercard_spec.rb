@@ -21,13 +21,22 @@ describe Oystercard do
   it { should_not be_in_journey } #used predicate method matcher
 
   it "touching in changes in_journey to true" do
+    subject.top_up(2)
     subject.touch_in
     expect(subject.in_journey?).to eq true
   end
 
   it "touching out changes in_journey to false" do
+    subject.top_up(2)
     subject.touch_in
     subject.touch_out
     expect(subject.in_journey?).to eq false
+  end
+  it "checks for minimum balance on touch in and raises error if balance is < minimum fare: #{Oystercard::MINIMUM_FARE}" do
+    expect { subject.touch_in}.to raise_error("Error: insufficient funds. Balance is #{subject.balance}.")
+  end
+  it "checks for minimum balance on touch in and does not raise error if balance is >= minimum fare: #{Oystercard::MINIMUM_FARE}" do
+    subject.top_up(Oystercard::MINIMUM_FARE)
+    expect(subject.touch_in).to eq true
   end
 end
