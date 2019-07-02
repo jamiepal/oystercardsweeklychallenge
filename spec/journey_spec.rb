@@ -12,4 +12,9 @@ describe Journey do
       expect(journey.exit_station).to eq nil
     end
   end
+  describe '#calc_fare' do
+    journey = Journey.new
+    journey.calc_fare
+    it 'calculates the penalty or minimum fare'
+
 end
