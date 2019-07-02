@@ -5,6 +5,9 @@ describe Oystercard do
     it "initialises with a default balance of 0" do
       expect(subject.balance).to eq 0
     end
+    it "is initializes journey_history to []" do
+      expect(subject.journey_history).to eq []
+    end
   end
   describe "#top_up" do
     it "the balance can be topped up with top_up method" do
@@ -28,20 +31,26 @@ describe Oystercard do
     it "touching out changes in_journey to false" do
       subject.top_up(2)
       subject.touch_in("waterloo")
-      subject.touch_out
+      subject.touch_out("paddington")
       expect(subject.in_journey?).to eq false
     end
     it "deducts minimumfare from balance upon touch-out" do
       subject.top_up(2)
       subject.touch_in("waterloo")
-      expect {subject.touch_out}.to change{subject.balance}.by(-1)
+      expect {subject.touch_out("paddington")}.to change{subject.balance}.by(-1)
     end
     it "sets entry_station to nil on touch_out" do
       subject.top_up(2)
       subject.touch_in("waterloo")
-      subject.touch_out
+      subject.touch_out("paddington")
       expect(subject.entry_station).to eq nil
     end
+    it "sets exit_station to station name in argument" do
+      subject.top_up(2)
+      subject.touch_in("waterloo")
+      subject.touch_out("paddington")
+      expect(subject.exit_station).to eq "paddington"
+      end
   end
   describe "#touch_in" do
     it "touching in changes in_journey to true" do
@@ -62,5 +71,17 @@ describe Oystercard do
       expect(subject.touch_in("waterloo")).to be_a(String)
     end
   end
+  describe "#journey_history" do
+    it "stores a single journey of entry and exit stations" do
+      subject.top_up(2)
+      subject.touch_in("waterloo")
+      subject.touch_out("paddington")
+      expect(subject.journey_history).to eq [{"waterloo" => "paddington" }]
+    end
+
+  end
+
+#  describe "#journey_history" do
+
 
 end
