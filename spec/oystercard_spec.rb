@@ -80,5 +80,5 @@ describe Oystercard do
     end
 
   end
-
+end
 #  describe "#journey_history" do
