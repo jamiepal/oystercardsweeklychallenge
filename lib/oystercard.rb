@@ -1,11 +1,10 @@
-
+require_relative 'journeylog'
 class OysterCard
   MAXIMUM_BALANCE = 90
   MINIMUM_FARE = 1
-  def initialize(balance = 0)
+  def initialize(balance = 0,journeylog=JourneyLog.new)
     @balance = balance
-    @journey_history = []
-    @journey_log = JourneyLog.new
+    @journey_log = journeylog
   end
   attr_reader :balance, :journey_history
 
@@ -14,58 +13,40 @@ class OysterCard
     @balance += amount
   end
 
-  def touch_in(station_name)
+  def touch_in(station)
     raise "Error: insufficient funds. Balance is #{@balance}." if @balance < MINIMUM_FARE
-    check_circumstances(true, station_name)
+    check_when_touch_in( station)
   end
 
-  def touch_out(station_name)
+  def touch_out(station)
     raise "Error: insufficient funds. Balance is #{@balance}." if @balance < 0
-    check_circumstances(false, station_name)
+    check_when_touch_out(station)
   end
 
   def in_journey?
-    if @journey_log.journey_list == []
-      false
-    else
-    !@journey_log.journey_list.last.complete
-    end
+    @journey_log.in_journey?
   end
   private
   def deduct(amount)
     @balance -= amount
   end
-  def check_circumstances(isittouchin, station_name)
-    if isittouchin
-      check_when_touch_in(station_name)
-    else
-      check_when_touch_out(station_name)
-    end
-  end
-  def check_when_touch_in(station_name)
-    if @journey_log.journey_list == []
-      @journey_log.create_journey(station_name)
-    elsif @journey_log.journey_list.last.complete
-      @journey_log.create_journey(station_name)
-    else
+
+  def check_when_touch_in(station)
+    if @journey_log.in_journey?
       @journey_log.end_journey
-      deduct(@journey_log.journey_list.last.calc_fare)
+      deduct(@journey_log.calc_fare)
       raise "Error: insufficient funds. Balance is #{@balance}." if @balance < MINIMUM_FARE
-      @journey_log.create_journey(station_name)
     end
+    @journey_log.start(station)
   end
-  def check_when_touch_out(station_name)
-    if @journey_log.journey_list== []
-      @journey_log.create_journey(nil,station_name)
-      deduct(@journey_log.journey_list.last.calc_fare)
-    elsif @journey_log.journey_list.last.complete
-      @journey_log.create_journey(nil, station_name)
-      deduct(@journey_log.journey_list.last.calc_fare)
+  
+  def check_when_touch_out(station)
+    if !@journey_log.in_journey?
+      @journey_log.start(nil, station)
     else
-      @journey_log.journey_list.last.exit_station = station_name
-      @journey_log.end_journey
-      deduct(@journey_log.journey_list.last.calc_fare)
+      @journey_log.finish(station)
     end
+    deduct(@journey_log.calc_fare)
   end
 
 end

@@ -1,4 +1,4 @@
-
+require_relative 'station'
 
 
 class Journey
@@ -20,14 +20,18 @@ class Journey
 
   def calc_fare
     if !@complete
-      return nil
+      return 0
     elsif @exit_station == nil || @entry_station == nil
       return PENALTY_FARE
     else
-      return MINIMUM_FARE
+      return MINIMUM_FARE + zone_transfer_fare(@entry_station.zone, @exit_station.zone)
     end
   end
   def finish_journey
     @complete = true
+  end
+  private
+  def zone_transfer_fare(zone1, zone2)
+    return (zone1 - zone2).abs
   end
 end
