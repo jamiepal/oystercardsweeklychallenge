@@ -5,6 +5,7 @@ class OysterCard
   def initialize(balance = 0)
     @balance = balance
     @journey_history = []
+    @journey_log = JourneyLog.new
   end
   attr_reader :balance, :journey_history
 
@@ -24,10 +25,10 @@ class OysterCard
   end
 
   def in_journey?
-    if @journey_history == []
+    if @journey_log.journey_list == []
       false
     else
-    !@journey_history.last.complete
+    !@journey_log.journey_list.last.complete
     end
   end
   private
@@ -42,28 +43,28 @@ class OysterCard
     end
   end
   def check_when_touch_in(station_name)
-    if @journey_history == []
-      @journey_history << Journey.new(station_name)
-    elsif @journey_history.last.complete
-      @journey_history << Journey.new(station_name)
+    if @journey_log.journey_list == []
+      @journey_log.create_journey(station_name)
+    elsif @journey_log.journey_list.last.complete
+      @journey_log.create_journey(station_name)
     else
-      @journey_history.last.finish_journey
-      deduct(@journey_history.last.calc_fare)
+      @journey_log.end_journey
+      deduct(@journey_log.journey_list.last.calc_fare)
       raise "Error: insufficient funds. Balance is #{@balance}." if @balance < MINIMUM_FARE
-      @journey_history << Journey.new(station_name)
+      @journey_log.create_journey(station_name)
     end
   end
   def check_when_touch_out(station_name)
-    if @journey_history == []
-      @journey_history << Journey.new(nil, station_name)
-      deduct(@journey_history.last.calc_fare)
-    elsif @journey_history.last.complete
-      @journey_history << Journey.new(nil, station_name)
-      deduct(@journey_history.last.calc_fare)
+    if @journey_log.journey_list== []
+      @journey_log.create_journey(nil,station_name)
+      deduct(@journey_log.journey_list.last.calc_fare)
+    elsif @journey_log.journey_list.last.complete
+      @journey_log.create_journey(nil, station_name)
+      deduct(@journey_log.journey_list.last.calc_fare)
     else
-      @journey_history.last.exit_station = station_name
-      @journey_history.last.finish_journey
-      deduct(@journey_history.last.calc_fare)
+      @journey_log.journey_list.last.exit_station = station_name
+      @journey_log.end_journey
+      deduct(@journey_log.journey_list.last.calc_fare)
     end
   end
 
